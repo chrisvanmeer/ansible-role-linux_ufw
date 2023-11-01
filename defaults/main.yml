@@ -2,8 +2,10 @@
 
 # todo: refactor to use single dict
 
-# empty config as fallback
-ufw_rules: {}
+# empty configs as fallback
+ufw_global_rules: {}
+ufw_group_rules: {}
+ufw_host_rules: {}
 
 # main switches
 configure_ufw_basics: true

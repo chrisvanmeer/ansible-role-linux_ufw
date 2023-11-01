@@ -16,7 +16,7 @@
     - rule.value.port is defined
     - rule.value.insert is undefined
 
-- name: "UFW | Rule | Processing rule '{{ rule.key }}' (w/o port restriction)"
+- name: "UFW | Rule | Processing rule - (w/o port restriction) - '{{ rule.key }}'"
   community.general.ufw:
     rule: "{{ rule.value.rule | default(defaults_rule.rule) }}"
     proto: "{{ rule.value.proto | default(defaults_rule.proto) }}"
@@ -31,7 +31,7 @@
     - rule.value.port is undefined
     - rule.value.insert is undefined
 
-- name: "UFW | Rule | Processing rule '{{ rule.key }}' (at custom position)"
+- name: "UFW | Rule | Processing rule - (at custom position) - '{{ rule.key }}'"
   community.general.ufw:
     rule: "{{ rule.value.rule | default(defaults_rule.rule) }}"
     proto: "{{ rule.value.proto | default(defaults_rule.proto) }}"
@@ -48,7 +48,7 @@
     - rule.value.port is defined
     - rule.value.insert is defined or rule.value.position is defined
 
-- name: "UFW | Rule | Processing rule '{{ rule.key }}' (w/o port restriction at custom position)"
+- name: "UFW | Rule | Processing rule - (w/o port restriction at custom position) - '{{ rule.key }}'"
   community.general.ufw:
     rule: "{{ rule.value.rule | default(defaults_rule.rule) }}"
     proto: "{{ rule.value.proto | default(defaults_rule.proto) }}"

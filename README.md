@@ -1,44 +1,14 @@
-# DEPRECATED
-
-Using UFW as middleware in automation does not make real sense.
-
-It creates unnecessary complexity for single-rule changes!
-
-In my eyes it is not a tool that is designed to be automated.
-
-I would actually recommend using NFTables: [ansibleguy.infra_nftables](https://github.com/ansibleguy/infra_nftables) 
-
 # Ansible Role - Uncomplicated Firewall (UFW)
 
-Ansible Role to deploy/configure the software firewall 'UFW' on a debian-based linux server.
-
-[![Molecule Test Status](https://badges.ansibleguy.net/linux_ufw.molecule.svg)](https://github.com/ansibleguy/_meta_cicd/blob/latest/templates/usr/local/bin/cicd/molecule.sh.j2)
-[![YamlLint Test Status](https://badges.ansibleguy.net/linux_ufw.yamllint.svg)](https://github.com/ansibleguy/_meta_cicd/blob/latest/templates/usr/local/bin/cicd/yamllint.sh.j2)
-[![PyLint Test Status](https://badges.ansibleguy.net/linux_ufw.pylint.svg)](https://github.com/ansibleguy/_meta_cicd/blob/latest/templates/usr/local/bin/cicd/pylint.sh.j2)
-[![Ansible-Lint Test Status](https://badges.ansibleguy.net/linux_ufw.ansiblelint.svg)](https://github.com/ansibleguy/_meta_cicd/blob/latest/templates/usr/local/bin/cicd/ansiblelint.sh.j2)
-[![Ansible Galaxy](https://badges.ansibleguy.net/galaxy.badge.svg)](https://galaxy.ansible.com/ui/standalone/roles/ansibleguy/linux_ufw)
-
-**Tested:**
-* Debian 11
-
-## Install
-
-```bash
-ansible-galaxy install ansibleguy.linux_ufw
-
-# or to custom role-path
-ansible-galaxy install ansibleguy.linux_ufw --roles-path ./roles
-
-# install dependencies
-ansible-galaxy install -r requirements.yml
-```
+Ansible Role to deploy/configure the software firewall 'UFW' on a debian-based linux server.  
+Forked from `ansibleguy/linux_ufw`
 
 ## Functionality
 
 This ansible role will do:
+
 * **Package installation**
   * UFW
-
 
 * **Configuration**
   * Rules via using **one of two modes**
@@ -48,9 +18,7 @@ This ansible role will do:
       * reset's the ufw state and rules every time
       * after that the new rules get applied
 
-
   * Verification that a ssh-rule is in place
-
 
 ## Info
 
@@ -58,20 +26,44 @@ This ansible role will do:
 
   For all available options - see the default-config located in the main defaults-file!
 
-
 * **Note:** this role currently only supports debian-based systems
 
-
 * **Warning:** Not every setting/variable you provide will be checked for validity. Bad config might break the role!
-
 
 ## Usage
 
 ### Config
 
-Just define the 'ufw_rules' dictionary as needed:
+Define at least one of the following dictionaries as needed:
+
 ```yaml
-ufw_rules:
+ufw_global_rules:
+  ruleShortName:
+    rule: 'allow'  # default if empty
+    port: 80
+    proto: 'tcp'
+    log: 'no'  # default if empty
+    from_ip: 'any'  # default if empty
+    to_ip: 'any'  # default if empty
+    direction: 'in'  # default if empty
+    present: true  # default if empty => will be used for stateful rule-check (alias = state: present)
+    position: 2  # you can define the position of the rule in the ruleset (alias = insert)
+    comment: 'You can overwrite the default comment'
+
+ufw_group_rules:
+  ruleShortName:
+    rule: 'allow'  # default if empty
+    port: 80
+    proto: 'tcp'
+    log: 'no'  # default if empty
+    from_ip: 'any'  # default if empty
+    to_ip: 'any'  # default if empty
+    direction: 'in'  # default if empty
+    present: true  # default if empty => will be used for stateful rule-check (alias = state: present)
+    position: 2  # you can define the position of the rule in the ruleset (alias = insert)
+    comment: 'You can overwrite the default comment'
+
+ufw_host_rules:
   ruleShortName:
     rule: 'allow'  # default if empty
     port: 80
@@ -84,16 +76,18 @@ ufw_rules:
     position: 2  # you can define the position of the rule in the ruleset (alias = insert)
     comment: 'You can overwrite the default comment'
 ```
-or the compact way:
+
+If you want to support IPv6 as well, set the following variable:
+
 ```yaml
-ufw_rules: {
-    ruleShortName: {rule: 'allow',  port: 80, proto: 'tcp', log: 'no', from_ip: 'any', to_ip: 'any', direction: 'in', state: 'present', position: 2, comment: 'You can overwrite the default comment'}
-}
+ufw_config:
+  ipv6: 'yes'
 ```
 
 ### Execution
 
 Run the playbook:
+
 ```bash
 ansible-playbook -K -D -i inventory/hosts.yml playbook.yml
 ```
@@ -103,8 +97,9 @@ The ufw-task itself is '[community.general.ufw](https://docs.ansible.com/ansible
 ### Example
 
 **State before:**
+
 ```bash
-guy@ansible:~$ sudo ufw status numbered
+chris@ansible:~$ sudo ufw status numbered
 Status: active
 
      To                         Action      From
@@ -114,10 +109,11 @@ Status: active
 ```
 
 **Config**
+
 ```yaml
-ufw_rules:
+ufw_global_rules:
   # incoming traffic restrictions
-  SecShöl:
+  SSH:
     port: 22
     proto: 'tcp'
     log: true
@@ -139,7 +135,7 @@ ufw_rules:
     proto: 'udp'
     from_ip: '10.10.10.1'
     to_ip: '10.10.20.254'
-  
+
   # outgoing traffic restrictions
   denyNtpOutgoing:
     port: 123
@@ -160,13 +156,14 @@ ufw_rules:
 ```
 
 **Result:**
+
 ```bash
-guy@ansible:~$ sudo ufw status numbered
+chris@ansible:~$ sudo ufw status numbered
 Status: active
 
      To                         Action      From
      --                         ------      ----
-[ 1] 22/tcp                     LIMIT IN    Anywhere                   (log) # Ansible managed - SecShöl
+[ 1] 22/tcp                     LIMIT IN    Anywhere                   (log) # Ansible managed - SSH
 [ 2] 8482/tcp                   ALLOW IN    Anywhere                   # Ansible managed - RandomWebServer
 [ 3] 54038:54085/udp            ALLOW IN    192.168.194.0/28           (log) # Ansible managed - SecureLink
 [ 4] 10.10.20.254/esp           ALLOW IN    10.10.10.1/esp             # Ansible managed - ipsecESP

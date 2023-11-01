@@ -1,5 +1,10 @@
 ---
 
+- name: UFW | Combine global, group and host rules
+  ansible.builtin.set_fact:
+    uwf_rules: "{{ ufw_global_rules | combine(ufw_group_rules | combine(ufw_host_rules)) }}"
+  tags: [ufw, firewall]
+
 - name: UFW | Notify if no rules are defined
   ansible.builtin.pause:
     prompt: 'You have not defined any ufw-rules! Only the generic ssh-rule will be processed. Do you want to continue?'
