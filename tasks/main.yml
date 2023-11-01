@@ -2,7 +2,7 @@
 
 - name: UFW | Combine global, group and host rules
   ansible.builtin.set_fact:
-    uwf_rules: "{{ ufw_global_rules | combine(ufw_group_rules | combine(ufw_host_rules)) }}"
+    ufw_rules: "{{ ufw_global_rules | combine(ufw_group_rules | combine(ufw_host_rules)) }}"
   tags: [ufw, firewall]
 
 - name: UFW | Notify if no rules are defined
